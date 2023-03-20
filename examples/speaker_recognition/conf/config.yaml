@@ -1,0 +1,3 @@
+target_audio_file: ???
+defaults:
+  - sr: nemo_sr

@@ -1,0 +1,21 @@
+
+speaker_recognition:
+  base_dir: model
+  enroll_embs_npy_file: ${.base_dir}/enroll_embs.npy
+  enroll_truelabels_npy_file: ${.base_dir}/enroll_truelabels.npy
+  enroll_id2label_file: ${.base_dir}/enroll_id2label.json
+  speaker_key2name_file: ${.base_dir}/speaker_key2name.json
+  sr_onnx_filename: ${.base_dir}/titanet_large.onnx
+
+preprocessor:
+  _target_: nemo.collections.asr.modules.AudioToMelSpectrogramPreprocessor
+  normalize: per_feature
+  window_size: 0.025
+  sample_rate: 16000
+  window_stride: 0.01
+  window: 'hann'
+  features: 80
+  n_fft: 512
+  frame_splicing: 1
+  dither: 1e-05
+

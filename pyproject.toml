@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "nemo-helper"
+version = "0.1.0"
+description = ""
+authors = ["limdongjin <geniuslim27@gmail.com>"]
+readme = "README.md"
+packages = [{include = "nemo_helper"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+onnxruntime = "^1.14.1"
+hydra-core = "1.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

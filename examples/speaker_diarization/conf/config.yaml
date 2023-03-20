@@ -1,0 +1,3 @@
+target_audio_file: ???
+defaults:
+  - sd: nemo_sd
