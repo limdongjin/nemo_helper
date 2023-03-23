@@ -40,4 +40,4 @@ ENTRYPOINT ["sleep", "1000000"]
 
 # WRITE your entrypoint
 #ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-#CMD ["/app/.venv/bin/python3.9", "-m", "sid.entry"]
+#CMD ["/app/.venv/bin/python3.9", "/app/examples/speaker_diarization/src/entry.py"]

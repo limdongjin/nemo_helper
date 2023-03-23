@@ -1,3 +1,5 @@
+poetry.lock
+.cache
 model
 .venv
 .DS_Store

@@ -1,3 +1,22 @@
+# https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/models/clustering_diarizer.py
+# https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/models/label_models.py
+#
+# some update for onnx by limdongjin
+# 
+# Copyright (c) 2022, NVIDIA CORPORATION.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import json
 import os
 import pickle as pkl
@@ -71,11 +90,6 @@ def to_numpy(tensor_obj: torch.Tensor):
     return tensor_obj.detach().cpu().numpy()
     # return tensor_obj.detach().cpu().numpy()
 
-# https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/models/clustering_diarizer.py
-# https://github.com/NVIDIA/NeMo/blob/main/nemo/collections/asr/models/label_models.py
-#
-# some update for onnx by limdongjin
-# 
 class ClusteringDiarizerOnnx(torch.nn.Module, Model, DiarizationMixin):
     """
     Inference model Class for offline speaker diarization. 
@@ -131,6 +145,7 @@ class ClusteringDiarizerOnnx(torch.nn.Module, Model, DiarizationMixin):
             self._vad_session = onnxruntime.InferenceSession(model_path)
             assert 'vad_preprocessor' in self._cfg
             self._vad_preprocessor = EncDecClassificationModel.from_config_dict(self._cfg.vad_preprocessor)
+            logging.info("VAD model loaded locally from {}".format(model_path))
         else:
             if model_path not in get_available_model_names(EncDecClassificationModel):
                 logging.warning(
@@ -706,9 +721,10 @@ class ClusteringDiarizerOnnx(torch.nn.Module, Model, DiarizationMixin):
         logging.info(all_reference)
         logging.info(all_hypothesis)
         logging.info("Outputs are saved in {} directory".format(os.path.abspath(self._diarizer_params.out_dir)))
+        self.hyp = all_hypothesis
 
         # Scoring
-        score_labels(
+        return score_labels(
             self.AUDIO_RTTM_MAP,
             all_reference,
             all_hypothesis,
@@ -716,8 +732,6 @@ class ClusteringDiarizerOnnx(torch.nn.Module, Model, DiarizationMixin):
             ignore_overlap=self._diarizer_params.ignore_overlap,
             verbose=self.verbose,
         )
-
-        return all_hypothesis
 
     @staticmethod
     def __make_nemo_file_from_folder(filename, source_dir):

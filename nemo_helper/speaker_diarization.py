@@ -1,9 +1,8 @@
 import json
 import os
-import wget
 import logging 
 
-from .nemo_onnx.clustering_diarizer_onnx import ClusteringDiarizerOnnx
+from .nemo_onnx.msdd_models_onnx import NeuralDiarizerOnnx
 
 class SpeakerDiarizer:
     def __init__(self, sd_model):
@@ -13,10 +12,13 @@ class SpeakerDiarizer:
         """Diarize and return timestamps such as:
             [('speaker_1', (0.0, 4.375)), ('speaker_0', (4.375, 6.360499858856201))]
         """
-        self._prepare_manifest(audio_file)        
+        self.prepare_manifest(audio_file)        
         try:
             logging.info("START sd_model.diarize()")
-            diar_res = self.sd_model.diarize()
+            self.sd_model.diarize()
+            logging.info(self.sd_model.refs)
+            logging.info(self.sd_model.hyps)
+            diar_res = self.sd_model.hyps[0]
             logging.info("OK sd_model.diarize()")
         except ValueError as e:
             logging.debug(e)
@@ -26,7 +28,7 @@ class SpeakerDiarizer:
         
         return timestamps
     
-    def _prepare_manifest(self, audio_file):
+    def prepare_manifest(self, audio_file):
         meta = {
             'audio_filepath': audio_file, # an4_audio
             'offset': 0,
@@ -37,7 +39,7 @@ class SpeakerDiarizer:
             'rttm_filepath': None, # an4_rttm
             'uem_filepath' : None
         }
-        with open(self.sd_model._diarizer_params.manifest_filepath, 'w') as fp:
+        with open(self.sd_model._cfg.diarizer.manifest_filepath, 'w') as fp:
             json.dump(meta, fp)
             fp.write('\n')
         return True
@@ -53,10 +55,10 @@ class SpeakerDiarizer:
         cfg.diarizer.out_dir = output_dir #Directory to store intermediate files and prediction outputs
         os.makedirs(output_dir, exist_ok=True)
 
-        sd_model = ClusteringDiarizerOnnx(cfg=cfg)
+        # sd_model = ClusteringDiarizerOnnx(cfg=cfg)
         if cfg.diarizer.vad.external_vad_manifest is not None:
             sd_model.has_vad_model = False
-
+        sd_model = NeuralDiarizerOnnx(cfg=cfg)
         speaker_diarizer = SpeakerDiarizer(sd_model=sd_model)
 
         return speaker_diarizer
